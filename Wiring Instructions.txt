@@ -1,0 +1,19 @@
+Author 	   : Gabe Harms
+Created	   : 7/27/2013
+Project	   : Door Lock
+Description: This document will provide the step by step hardware
+			 wiring instructions in order to set up the door lock.
+			 
+			 
+Hardware: Arduino
+	1. Hook up to usb power
+	2. Pin 2 to D3 of the RF transmitter
+	3. Both wires of the motor to channel B of motor shield
+
+Hardware: Transmitter
+	1. Pin D3 of to Pin 2 of Arduino
+	2. Ground and power to 5V and Ground provided by the Arduino
+
+Hardware: Lcd
+	1. SCL and SDA pins to SCL and SDA pins of the arduino
+	2. ground and power to 5V and Ground provided by the Arduino

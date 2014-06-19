@@ -1,0 +1,261 @@
+Author 	   : Gabe Harms
+Created	   : 7/27/2013
+Project	   : Door Lock
+File   	   : Door.h/Door.cpp
+Description: This document was created to describe each of the methods within the 
+		     the Door Class. This class was created by me in order to handle all
+			 of the computing neccessary to provide the door lock functionality.
+			 This class contains member variables which keep track of wheter the door
+			 is open or closed, any faults that occur, and the actual control of the 
+			 motor/actuator. The information below describes the function of every
+			 class method and class variable within the Door class.
+			 
+			 
+Method: Door
+Method Type: Default Constructor
+Private/Public: Public
+Return Type: N/A
+Parameters: None
+Pins Read: None
+Pins Initialized: None
+Pins Written: None
+Class Variables Read: None
+Class Variables Written: None
+Class Methods Used: Door
+Description: This is the default constructor of the Door class. It merely
+calls the init constructor using arbitrary pin values. In other applications
+this default constructor would be useless since you need to know which pins
+to use. Otherwise you won't know how to control the transmitter input or motor.
+
+Method: Door
+Method Type: Init Constructor
+Private/Public: Public
+Return Type: N/A
+Parameters: int transmitterIn, int motorSpeed, int motorDir, int motorBrake
+Pins Read: None
+Pins Initialized: transmitterIn, motorSpeed, motorDir, motorBrake
+Pins Written: transmitterIn(INPUT_PULLUP), motorSpeed(OUTPUT), motorDir(OUTPUT), motorBrake(OUTPUT)
+Class Variables Read: None
+Class Variables Written: All
+Class Methods Used: None
+Description: This contructor initialiizes all of the member variables within
+the class. it sets the transmitterIn and motor variables to the value of the
+parameters. These values represent the pin numbers. after this then all of the fault 
+class member variables get set to zero. then this method initializes the pins
+using the pinMode function of the Arduino class. This allows these pins to be 
+read and written in the future. the class member variables are used here. their
+integer values represent the pin number on the arduino UNO. Finally the motor 
+pins are written to their intial value of zero. The motor brake pin of the arduino
+motor shield is used. could easily be taken out of the code for this or the future
+actuator implementation.
+
+Method: checkCommandStatus
+Method Type: General
+Private/Public: Public
+Return Type: void
+Parameters: None
+Pins Read: transmitterIn
+Pins Initialized: None
+Pins Written: None
+Class Variables Read: doorState,
+Class Variables Written: None
+Class Methods Used: openDoor, closeDoor, printTime, faultCheck
+Description: The purpose of this function is to make sure the door is being 
+open/closed when it needs to be. This function checks the transmitterIn input
+using the digitalWrite function of the Arduino. If it matches the doorState 
+member variable,then nothing happens. If the transmitterIn and doorState do 
+not match, then either openDoor() or closeDoor() will be called depending on
+if the transmitterIN is High or Low. This function prints to serial if the 
+openDoor() or closeDoor() function has been called. It also prints the time
+it was called using the printTime function. Finally at the end, no matter 
+what conditions, it calls faultCheck(). 
+
+
+Method: checkDoorStatus
+Method Type: General
+Private/Public: Public
+Return Type: void
+Parameters: None
+Pins Read: transmitterIn
+Pins Initialized: None
+Pins Written: None
+Class Variables Read: doorState, wiggleRoom
+Class Variables Written: wiggleRoom, stateConflict
+Class Methods Used: faultCheck
+Description: This method is called in order to make sure that the transmitterIn
+and doorState are not in conflict. If they are equal, then wiggleRoom gets reset
+to zero. WiggleRoom is used as a counter. Since it takes time to open and close
+the door, i have created thi wiggleRoom variable to count how many times the two
+are in conflict. If it gets to 3, then stateConflict is set to true. And when
+faultCheck() is called, a fault will be reported. This function provides a check
+just in case the checkCommandStatus is consistently unable to change the state of
+the door. That way i can be notifed of the error.
+
+Method: getDoorState
+Method Type: Accessor
+Private/Public: Public
+Return Type: boolean
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: doorState
+Class Variables Written: None
+Class Methods Used: None
+Description: This function returns the true/false value of the doorState
+member variable.
+
+Method: isThereAFault
+Method Type: Accessor
+Private/Public: Public
+Return Type: boolean
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: fault
+Class Variables Written: None
+Class Methods Used: None
+Description: This function returns the true/false value of the fault member
+variable.
+
+Method: getStateConflictCount
+Method Type: Accessor
+Private/Public: Public
+Return Type: int
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: stateConflictCount
+Class Variables Written: None
+Class Methods Used: None
+Description: This function returns the integer value of the stateConflictCount
+member variable
+
+Method: getOpenFaultCount
+Method Type: Accessor
+Private/Public: Public
+Return Type: int
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: openFaultCount
+Class Variables Written: None
+Class Methods Used: None
+Description: This function returns the integer value of the openFaultCount
+member variable
+
+Method: getCloseFaultCount
+Method Type: Accessor
+Private/Public: Public
+Return Type: int
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: closeFaultCount
+Class Variables Written: None
+Class Methods Used: None
+Description: This function returns the integer value of the closeFaultCount
+member variable
+
+Method: openDoor
+Method Type: Modifier
+Private/Public: Private
+Return Type: void
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: motorDir, motorBrake, motorSpeed
+Class Variables Read: doorState
+Class Variables Written: doorState, openFault
+Class Methods Used: printTime, faultCheck
+Description: This function is responsible for turning on the motor, in one 
+direction and then changing the state of the door. First the function performs
+another check by checking the value of the doorState. If it detects that the
+doorState is false(closed), then then it continues. Otherwise it sets a fault. When it 
+continues, it writes the motorDir to High, using digitalWrite, since this is 
+the open direction of motor. It then sets motorBrake to low, using digitalWrite,
+to turn off the brake. Then motorSpeed is set to 150 using analagWrite. It then prints
+out to serial, that the door is being opened. Then since this version uses the motor
+it delays for 3 seconds and then sets the motorSpeed to zero, and turns the brake 
+on. When an actuator is used, there will be no delay, and the motorSpeed will be
+left on. Finally it sets doorState to High indicating that the door is now open,
+and prints to serial that the door is now open. After all this is completed it 
+calls faultCheck(). If openFault was set during this openDoor function then faultCheck()
+will report it.
+
+Method: openDoor
+Method Type: Modifier
+Private/Public: Private
+Return Type: void
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: motorDir, motorBrake, motorSpeed
+Class Variables Read: doorState
+Class Variables Written: doorState, openFault
+Class Methods Used: printTime, faultCheck
+Description: This function is responsible for turning on the motor, in one 
+direction and then changing the state of the door. First the function performs
+another check by checking the value of the doorState. If it detects that the
+doorState is true(open), then then it continues. Otherwise it sets a fault. When it 
+continues, it writes the motorDir to Low, using digitalWrite, since this is 
+the close direction of motor. It then sets motorBrake to low, using digitalWrite,
+to turn off the brake. Then motorSpeed is set to 150 using analagWrite. It then prints
+out to serial, that the door is being closed. Then since this version uses the motor
+it delays for 3 seconds and then sets the motorSpeed to zero, and turns the brake 
+on. When an actuator is used, there will be no delay, and the motorSpeed will be
+left on. Finally it sets doorState to Low indicating that the door is now closed,
+and prints to serial that the door is now closed. After all this is completed it 
+calls faultCheck(). If closeFault was set during this openDoor function then faultCheck()
+will report it.
+
+Method: faultCheck
+Method Type: Modifier
+Private/Public: Private
+Return Type: void
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: stateConflict, openFault, closeFault, faultReport
+Class Variables Written: fault, faultReport, stateConflict, stateConflictCount, openFault, openFaultCount, closeFault, closeFaultCount
+Class Methods Used: printTime
+Description: This function is called at the end of most of the classes other function. It
+will check to see if any of the stateConflict, openFault, or closeFault variables are true.
+If it detects that any of these faults are true, it sets fault and fault report to true.
+It then bumps the counter of that fault (stateConflictCount, openFaultCount, or CloseFaultCount)
+by one. Finally it will set any fault, that it has detected to be true, to false. Before it 
+moves on to check other faults, it will print to serial the specific fault has been detected.
+After it has checked to see if any of these three faults were true, it checks to see if the
+faultReport variable is true. This will have been set to true within this method if any of the three
+faults are detected. If faultReport is detected to be true, then a fault report will be generated
+It will display every fault with how ever many times it has been detected, even it it is zero.
+The fault variable which is set in this method, but is not used. This variable is for the use
+of the loop function in the main cpp file. The loop function gets the variable value using the
+isThereAFault() method of this class. The loop then uses this value to set lcd display.
+
+Method: printTime
+Method Type: General
+Private/Public: Public
+Return Type: void
+Parameters: None
+Pins Read: None
+Pins Initialized: None 
+Pins Written: None
+Class Variables Read: milliSeconds, hours, minutes, seconds
+Class Variables Written: milliSeconds, hours, minutes, seconds
+Class Methods Used: None
+Description: This function prints the time to serial. It uses the member variables milliSeconds
+hours, minutes and seconds to generate the time since the Arduino has been turned on. This is 
+complicated because i wanted to print the hours, minutes and seconds, when the Arduino class only
+provides the milliseconds. That meant that alot of conversion had to take place to get it to accurately
+print the time in the desired format. Which is all print to serial. This function is primarily called
+after an event is reported to serial so that you can see when the event took place
+
+
+
+
